@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Sistema Oficial de Ponto | Fundação Juracy Marden</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #eef2f5;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background: #1f3c88;
+      color: #fff;
+      padding: 15px;
+      text-align: center;
+    }
+    main {
+      max-width: 500px;
+      margin: 40px auto;
+      background: #fff;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    h2 { text-align: center; }
+    input, button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 12px;
+      font-size: 15px;
+    }
+    button {
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .entrada { background: #2ecc71; color: #fff; }
+    .saida { background: #e74c3c; color: #fff; }
+    .admin { background: #34495e; color: #fff; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    table, th, td {
+      border: 1px solid #ccc;
+    }
+    th, td {
+      padding: 8px;
+      font-size: 13px;
+      text-align: center;
+    }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Fundação Juracy Marden</h1>
+  <p>Sistema Oficial de Ponto Eletrônico</p>
+</header>
+
+<main>
+  <div id="login">
+    <h2>Registro de Ponto</h2>
+    <input type="text" id="matricula" placeholder="Matrícula do funcionário" />
+    <button class="entrada" onclick="registrar('Entrada')">Bater Entrada</button>
+    <button class="saida" onclick="registrar('Saída')">Bater Saída</button>
+    <button class="admin" onclick="abrirAdmin()">Área Administrativa</button>
+  </div>
+
+  <div id="admin" class="hidden">
+    <h2>Administração</h2>
+    <input type="password" id="senhaAdmin" placeholder="Senha do administrador" />
+    <button class="admin" onclick="loginAdmin()">Entrar</button>
+
+    <div id="painel" class="hidden">
+      <h3>Registros de Ponto</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Matrícula</th>
+            <th>Tipo</th>
+            <th>Data</th>
+            <th>Hora</th>
+          </tr>
+        </thead>
+        <tbody id="tabela"></tbody>
+      </table>
+      <button class="saida" onclick="sairAdmin()">Sair</button>
+    </div>
+  </div>
+</main>
+
+<script>
+  const ADMIN_SENHA = "juracymarden2026";
+
+  function registrar(tipo) {
+    const matricula = document.getElementById('matricula').value.trim();
+    if (!matricula) {
+      alert('Informe a matrícula.');
+      return;
+    }
+
+    const agora = new Date();
+    const registro = {
+      matricula,
+      tipo,
+      data: agora.toLocaleDateString('pt-BR'),
+      hora: agora.toLocaleTimeString('pt-BR')
+    };
+
+    const registros = JSON.parse(localStorage.getItem('pontos')) || [];
+    registros.push(registro);
+    localStorage.setItem('pontos', JSON.stringify(registros));
+
+    alert(`${tipo} registrada com sucesso!`);
+    document.getElementById('matricula').value = '';
+  }
+
+  function abrirAdmin() {
+    document.getElementById('login').classList.add('hidden');
+    document.getElementById('admin').classList.remove('hidden');
+  }
+
+  function loginAdmin() {
+    const senha = document.getElementById('senhaAdmin').value;
+    if (senha !== ADMIN_SENHA) {
+      alert('Senha incorreta');
+      return;
+    }
+    document.getElementById('painel').classList.remove('hidden');
+    carregarTabela();
+  }
+
+  function carregarTabela() {
+    const registros = JSON.parse(localStorage.getItem('pontos')) || [];
+    const tabela = document.getElementById('tabela');
+    tabela.innerHTML = '';
+
+    registros.forEach(r => {
+      const linha = `<tr><td>${r.matricula}</td><td>${r.tipo}</td><td>${r.data}</td><td>${r.hora}</td></tr>`;
+      tabela.innerHTML += linha;
+    });
+  }
+
+  function sairAdmin() {
+    document.getElementById('admin').classList.add('hidden');
+    document.getElementById('login').classList.remove('hidden');
+    document.getElementById('senhaAdmin').value = '';
+  }
+</script>
+
+</body>
+</html>
